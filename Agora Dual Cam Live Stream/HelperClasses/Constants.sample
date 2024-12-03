@@ -1,0 +1,13 @@
+//
+//  Constants.sample
+//  Agora Dual Cam Live Stream
+//
+//  Created by Shwait Kumar on 03/12/24.
+//
+
+import Foundation
+
+struct Constants {
+    // Replace with your Agora App ID
+    static let agoraAppId = "YOUR_APP_ID_HERE"
+}
