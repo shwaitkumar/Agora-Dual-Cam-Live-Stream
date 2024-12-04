@@ -317,6 +317,6 @@ extension DualCamViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
         videoFrame.textureBuf = mergedBuffer
         videoFrame.rotation = 90 // Adjust rotation for portrait orientation
 
-        agoraKit?.pushExternalVideoFrame(videoFrame)
+        agoraKit?.pushExternalVideoFrame(videoFrame, videoTrackId: 0)
     }
 }
