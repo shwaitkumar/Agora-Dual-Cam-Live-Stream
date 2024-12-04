@@ -32,6 +32,8 @@ class DualCamViewController: UIViewController {
         super.viewDidLoad()
         
         // Request permissions and setup
+        title = "Host Mode"
+        
         requestPermissions { [weak self] granted in
             DispatchQueue.main.async {
                 if granted {
@@ -131,8 +133,8 @@ class DualCamViewController: UIViewController {
 
     func joinChannel() {
         guard let agoraKit = agoraKit else { return }
-        let token: String? = nil
-        let channelName = "dual_camera_test"
+        let token: String? = "0064c4bc1e58b874faaa14949793d16b5ecIABTGuUxx47whcKEA6BVXUrZJrOeQMujPuO4DdgvtvKVIcOswaAAAAAAIgBjMhBGkUZRZwQAAQCxgVBnAgCxgVBnAwCxgVBnBACxgVBn"
+        let channelName = "I73BGFUCR"
 
         agoraKit.joinChannel(byToken: token, channelId: channelName, info: nil, uid: 0) { (channel, uid, elapsed) in
             print("Joined channel: \(channel) with UID: \(uid)")
@@ -146,7 +148,7 @@ class DualCamViewController: UIViewController {
         backCameraView.backgroundColor = .black
         self.view.addSubview(backCameraView)
 
-        frontCameraView = UIView(frame: CGRect(x: 20, y: 50, width: 150, height: 200))
+        frontCameraView = UIView(frame: CGRect(x: 20, y: 120, width: 150, height: 200))
         frontCameraView.backgroundColor = .gray
         frontCameraView.layer.cornerRadius = 8
         frontCameraView.layer.masksToBounds = true

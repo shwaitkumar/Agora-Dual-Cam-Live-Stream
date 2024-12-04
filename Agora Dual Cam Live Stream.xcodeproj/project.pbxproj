@@ -158,9 +158,10 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Agora Dual Cam Live Stream/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Agora Dual Cam Live Stream";
+				INFOPLIST_KEY_NSCameraUsageDescription = "This app needs access to the camera for live streaming.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "This app needs access to the microphone for live streaming.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -190,9 +191,10 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Agora Dual Cam Live Stream/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Agora Dual Cam Live Stream";
+				INFOPLIST_KEY_NSCameraUsageDescription = "This app needs access to the camera for live streaming.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "This app needs access to the microphone for live streaming.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
