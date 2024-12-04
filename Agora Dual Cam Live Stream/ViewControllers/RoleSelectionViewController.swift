@@ -23,22 +23,13 @@ class RoleSelectionViewController: UIViewController {
         config.buttonSize = .large
         config.cornerStyle = .medium
         hostButton.configuration = config
-        
-//        hostButton.setTitle("Host", for: .normal)
-//        hostButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 20)
-//        hostButton.frame = CGRect(x: 50, y: 200, width: 300, height: 50)
-//        hostButton.center.x = self.view.center.x
         hostButton.translatesAutoresizingMaskIntoConstraints = false
         hostButton.addTarget(self, action: #selector(startHostMode), for: .touchUpInside)
         
         let audienceButton = UIButton(type: .system)
-//        audienceButton.setTitle("Audience", for: .normal)
-//        audienceButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 20)
-//        audienceButton.frame = CGRect(x: 50, y: 300, width: 300, height: 50)
         config.title = "Audience"
         config.baseBackgroundColor = .systemGreen
         audienceButton.configuration = config
-//        audienceButton.center.x = self.view.center.x
         audienceButton.translatesAutoresizingMaskIntoConstraints = false
         audienceButton.addTarget(self, action: #selector(startAudienceMode), for: .touchUpInside)
         

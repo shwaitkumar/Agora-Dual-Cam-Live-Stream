@@ -8,6 +8,7 @@
 import UIKit
 import AVFoundation
 import AgoraRtcKit
+import CoreImage
 
 class DualCamViewController: UIViewController {
     
@@ -27,6 +28,10 @@ class DualCamViewController: UIViewController {
     // Status Indicators
     var statusLabel: UILabel!
     var liveIcon: UIView!
+    
+    // Buffers for holding frames from each camera
+    var frontPixelBuffer: CVPixelBuffer?
+    var backPixelBuffer: CVPixelBuffer?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -121,21 +126,19 @@ class DualCamViewController: UIViewController {
     // MARK: - Agora Setup
     
     func initializeAgoraEngine() {
-        // Comment below line if you want to directly paste APP ID below
         agoraKit = AgoraRtcEngineKit.sharedEngine(withAppId: Constants.agoraAppId, delegate: self)
-        /* Remove this long comment line and directly paste you APP ID in below code
-         agoraKit = AgoraRtcEngineKit.sharedEngine(withAppId: "PASTE_YOUR_AGORA_APP_ID_HERE", delegate: self)
-         */
         agoraKit?.enableVideo()
+        agoraKit?.setClientRole(.broadcaster)
         agoraKit?.setExternalVideoSource(true, useTexture: false, sourceType: .videoFrame)
+
         print("Agora Engine initialized successfully")
     }
 
     func joinChannel() {
         guard let agoraKit = agoraKit else { return }
         
-        let token: String? = nil // No token required
-        let channelName = "TLAB4VDP1" // Ensure the same channel name is used for host and audience
+        let token: String? = nil
+        let channelName = "dual-cam-test"
         let uid: UInt = 12345 // Unique UID for the host
 
         agoraKit.joinChannel(byToken: token, channelId: channelName, info: nil, uid: uid) { (channel, uid, elapsed) in
@@ -248,7 +251,72 @@ extension DualCamViewController: AgoraRtcEngineDelegate {
 
 extension DualCamViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-        let isFrontCamera = (output == frontCameraOutput)
-        frameHandler?(sampleBuffer, isFrontCamera)
+        guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
+            print("Failed to get pixel buffer")
+            return
+        }
+
+        // Determine which camera the frame is from and store the buffer
+        if output == frontCameraOutput {
+            frontPixelBuffer = pixelBuffer
+        } else if output == backCameraOutput {
+            backPixelBuffer = pixelBuffer
+        }
+
+        // Ensure both buffers are available before merging
+        guard let frontBuffer = frontPixelBuffer, let backBuffer = backPixelBuffer else { return }
+
+        // Merge frames and push to Agora
+        if let mergedBuffer = mergeFrames(frontBuffer: frontBuffer, backBuffer: backBuffer) {
+            pushMergedFrameToAgora(mergedBuffer)
+        }
+    }
+    
+    private func mergeFrames(frontBuffer: CVPixelBuffer, backBuffer: CVPixelBuffer) -> CVPixelBuffer? {
+        let ciContext = CIContext()
+
+        // Convert buffers to CIImages
+        let frontImage = CIImage(cvPixelBuffer: frontBuffer)
+        let backImage = CIImage(cvPixelBuffer: backBuffer)
+
+        // Get dimensions of the back camera frame (base layer)
+        let width = CVPixelBufferGetWidth(backBuffer)
+        let height = CVPixelBufferGetHeight(backBuffer)
+
+        // Scale and position the front camera overlay
+        let resizedFrontImage = frontImage.transformed(by: CGAffineTransform(scaleX: CGFloat(width) / 2.5 / frontImage.extent.width,
+                                                                             y: CGFloat(height) / 2.3 / frontImage.extent.height))
+        let frontTransform = CGAffineTransform(translationX: 20, y: (CGFloat(height) / 2) + 20)
+
+        // Apply the transform to position the front camera
+        let positionedFrontImage = resizedFrontImage.transformed(by: frontTransform)
+
+        // Correct compositing: Place front camera on top of back camera
+        let overlayedImage = positionedFrontImage.composited(over: backImage)
+
+        // Create a new pixel buffer for the merged frame
+        var mergedBuffer: CVPixelBuffer?
+        let attributes: [String: Any] = [
+            kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA,
+            kCVPixelBufferWidthKey as String: width,
+            kCVPixelBufferHeightKey as String: height
+        ]
+        CVPixelBufferCreate(kCFAllocatorDefault, width, height, kCVPixelFormatType_32BGRA, attributes as CFDictionary, &mergedBuffer)
+
+        // Render the overlayed image into the new pixel buffer
+        if let mergedBuffer = mergedBuffer {
+            ciContext.render(overlayedImage, to: mergedBuffer)
+        }
+
+        return mergedBuffer
+    }
+
+    private func pushMergedFrameToAgora(_ mergedBuffer: CVPixelBuffer) {
+        let videoFrame = AgoraVideoFrame()
+        videoFrame.format = 12 // NV12 format
+        videoFrame.textureBuf = mergedBuffer
+        videoFrame.rotation = 90 // Adjust rotation for portrait orientation
+
+        agoraKit?.pushExternalVideoFrame(videoFrame)
     }
 }
